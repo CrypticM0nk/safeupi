@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SafeUPI · Digital Fortification through Clarity</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2563EB;
+  --blue-light:#3B82F6;
+  --blue-pale:#EFF6FF;
+  --blue-mid:#1D4ED8;
+  --gray-50:#F9FAFB;
+  --gray-100:#F3F4F6;
+  --gray-200:#E5E7EB;
+  --gray-300:#D1D5DB;
+  --gray-400:#9CA3AF;
+  --gray-500:#6B7280;
+  --gray-700:#374151;
+  --gray-900:#111827;
+  --white:#ffffff;
+  --radius:10px;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+}
+body{font-family:var(--font);color:var(--gray-900);background:var(--white);line-height:1.6}
+
+/* ── NAV ── */
+nav{display:flex;align-items:center;justify-content:space-between;padding:0 48px;height:58px;border-bottom:1px solid var(--gray-200);position:sticky;top:0;background:var(--white);z-index:100}
+.nav-logo{font-weight:700;font-size:17px;color:var(--blue);text-decoration:none;cursor:pointer;display:flex;align-items:center;gap:8px}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{font-size:14px;color:var(--gray-700);text-decoration:none;cursor:pointer;padding-bottom:2px;transition:color .15s}
+.nav-links a:hover{color:var(--gray-900)}
+.nav-links a.active{color:var(--gray-900);border-bottom:2px solid var(--gray-900)}
+.btn-primary{background:var(--blue);color:var(--white);border:none;border-radius:8px;padding:9px 20px;font-size:14px;font-weight:500;cursor:pointer;transition:background .15s}
+.btn-primary:hover{background:var(--blue-mid)}
+
+/* ── PAGE SYSTEM ── */
+.page{display:none}
+.page.active{display:block}
+
+/* ── SHARED SIMPLE PAGE ── */
+.simple-page{max-width:780px;margin:0 auto;padding:56px 32px 100px}
+.back-btn{display:inline-flex;align-items:center;gap:8px;color:var(--blue);font-size:14px;cursor:pointer;background:none;border:none;font-family:inherit;margin-bottom:36px;padding:0}
+.back-btn:hover{opacity:.75}
+.page-eyebrow{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+.simple-page h1{font-size:34px;font-weight:700;margin-bottom:10px;line-height:1.2}
+.last-upd{font-size:13px;color:var(--gray-400);margin-bottom:48px}
+.prose h2{font-size:18px;font-weight:700;margin:32px 0 10px;color:var(--gray-900)}
+.prose p{font-size:14.5px;color:var(--gray-700);line-height:1.8;margin-bottom:14px}
+.prose ul{padding-left:20px;display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.prose ul li{font-size:14px;color:var(--gray-700);line-height:1.6}
+.prose .highlight{background:var(--blue-pale);border-left:3px solid var(--blue);border-radius:0 6px 6px 0;padding:14px 18px;margin:16px 0}
+.prose .highlight p{margin:0;color:var(--gray-700)}
+
+/* ── ABOUT / HOME ── */
+.about-hero{text-align:center;padding:88px 24px 64px;max-width:640px;margin:0 auto}
+.about-hero h1{font-size:44px;font-weight:700;line-height:1.15;margin-bottom:20px}
+.about-hero p{font-size:16px;color:var(--gray-500);line-height:1.7;margin-bottom:36px}
+.hero-actions{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
+.btn-hero{background:var(--blue);color:var(--white);border:none;border-radius:9px;padding:13px 26px;font-size:15px;font-weight:600;cursor:pointer;transition:background .15s}
+.btn-hero:hover{background:var(--blue-mid)}
+.btn-ghost{background:transparent;color:var(--gray-700);border:1px solid var(--gray-200);border-radius:9px;padding:12px 22px;font-size:15px;cursor:pointer;transition:all .15s}
+.btn-ghost:hover{border-color:var(--blue);color:var(--blue)}
+.hero-badges{display:flex;align-items:center;justify-content:center;gap:20px;margin-top:28px;flex-wrap:wrap}
+.badge{font-size:12px;color:var(--gray-400);display:flex;align-items:center;gap:6px}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:var(--blue)}
+
+.section-wrap{max-width:960px;margin:0 auto;padding:0 32px 80px}
+.section-header{font-size:22px;font-weight:700;margin-bottom:16px}
+.section-divider{border:none;border-top:1px solid var(--gray-200);margin-bottom:28px}
+
+/* Story card */
+.story-card{border:1px solid var(--gray-200);border-radius:var(--radius);display:grid;grid-template-columns:1fr 360px;overflow:hidden}
+.story-text{padding:28px 32px}
+.story-text h3{color:var(--blue);font-size:16px;font-weight:600;margin-bottom:12px}
+.story-text p{font-size:14px;color:var(--gray-700);line-height:1.7;margin-bottom:14px}
+.story-text p:last-child{margin-bottom:0}
+.story-img{background:#0F172A;overflow:hidden;position:relative;min-height:280px}
+.story-img-inner{width:100%;height:100%;background:linear-gradient(135deg,#0c1a2e 0%,#0e2a4a 40%,#0a1628 100%);display:flex;align-items:center;justify-content:center;position:absolute;inset:0}
+
+/* Values */
+.values-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:8px}
+.value-card{border:1px solid var(--gray-200);border-radius:var(--radius);padding:24px}
+.value-icon{width:40px;height:40px;border-radius:8px;background:var(--blue-pale);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.value-card h3{font-size:15px;font-weight:700;margin-bottom:8px}
+.value-card p{font-size:13.5px;color:var(--gray-500);line-height:1.6}
+
+/* How it works steps */
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:8px}
+.step-card{border:1px solid var(--gray-200);border-radius:var(--radius);padding:24px}
+.step-num{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--blue);margin-bottom:12px}
+.step-icon{width:42px;height:42px;border-radius:9px;background:var(--blue-pale);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.step-card h3{font-size:15px;font-weight:700;margin-bottom:8px}
+.step-card p{font-size:13.5px;color:var(--gray-500);line-height:1.6}
+
+/* Feature row */
+.feature-row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:8px}
+.feature-card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:24px}
+.feature-card h3{font-size:15px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.feature-card p{font-size:13.5px;color:var(--gray-500);line-height:1.6}
+.f-badge{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--blue-pale);color:var(--blue);border-radius:4px;padding:2px 7px}
+
+/* ── TERMS ── */
+.terms-page{max-width:780px;margin:0 auto;padding:48px 32px 80px}
+.legal-badge{display:inline-flex;align-items:center;gap:6px;background:var(--gray-100);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:600;color:var(--gray-500);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px}
+.terms-page h1{font-size:34px;font-weight:700;margin-bottom:10px}
+.terms-page .last-updated{font-size:13px;color:var(--gray-400);margin-bottom:40px}
+.terms-layout{display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:start}
+.terms-toc{position:sticky;top:72px;border:1px solid var(--gray-200);border-radius:var(--radius);padding:16px}
+.terms-toc .toc-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-500);margin-bottom:12px}
+.terms-toc ol{list-style:none;display:flex;flex-direction:column;gap:8px}
+.terms-toc li a{font-size:13px;color:var(--gray-700);text-decoration:none;cursor:pointer}
+.terms-toc li a:hover{color:var(--blue)}
+.terms-sections{display:flex;flex-direction:column;gap:24px}
+.terms-section-card{border:1px solid var(--gray-200);border-radius:var(--radius);padding:32px}
+.terms-section-title{display:flex;align-items:center;gap:10px;font-size:20px;font-weight:700;margin-bottom:18px}
+.terms-section-title .s-icon{width:28px;height:28px;flex-shrink:0}
+.terms-section-card p{font-size:14px;color:var(--gray-700);line-height:1.7;margin-bottom:14px}
+.terms-section-card p:last-child{margin-bottom:0}
+.terms-blockquote{border-left:3px solid var(--blue);background:var(--blue-pale);border-radius:0 6px 6px 0;padding:14px 18px;margin:16px 0 0}
+.terms-blockquote p{margin:0!important}
+.terms-list{list-style:disc;padding-left:20px;margin:12px 0;display:flex;flex-direction:column;gap:8px}
+.terms-list li{font-size:14px;color:var(--gray-700);line-height:1.6}
+.liability-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.liability-item{border:1px solid var(--gray-200);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.liability-item p{margin:0!important;font-size:13px}
+.terms-agree-wrap{text-align:center;margin-top:36px}
+.btn-agree{background:var(--blue);color:var(--white);border:none;border-radius:8px;padding:14px 36px;font-size:15px;font-weight:600;cursor:pointer}
+.btn-agree:hover{background:var(--blue-mid)}
+
+/* ── FAQ ── */
+.faq-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.faq-item{border:1px solid var(--gray-200);border-radius:8px;overflow:hidden}
+.faq-q{width:100%;background:var(--white);border:none;color:var(--gray-900);text-align:left;padding:16px 20px;font-size:14.5px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;justify-content:space-between;align-items:center;transition:background .15s}
+.faq-q:hover{background:var(--gray-50)}
+.faq-q.open{background:var(--blue-pale);color:var(--blue)}
+.faq-a{display:none;padding:14px 20px 18px;font-size:13.5px;color:var(--gray-500);line-height:1.7;border-top:1px solid var(--gray-200)}
+.faq-a.open{display:block}
+.chevron{transition:transform .2s;font-size:11px;color:var(--gray-400)}
+.faq-q.open .chevron{transform:rotate(180deg)}
+
+/* ── CONTACT FORM ── */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:20px}
+.contact-card{background:var(--gray-50);border:1px solid var(--gray-200);border-radius:var(--radius);padding:28px}
+.contact-card h3{font-size:15px;font-weight:700;margin-bottom:8px}
+.contact-card p{font-size:13.5px;color:var(--gray-500);margin-bottom:16px;line-height:1.6}
+.contact-card a{color:var(--blue);font-size:14px;font-weight:500}
+.contact-form input,.contact-form textarea{width:100%;background:var(--white);border:1px solid var(--gray-200);border-radius:7px;padding:10px 14px;font-size:14px;color:var(--gray-900);font-family:inherit;margin-bottom:10px;transition:border .15s}
+.contact-form input:focus,.contact-form textarea:focus{outline:none;border-color:var(--blue)}
+.contact-form textarea{height:96px;resize:vertical}
+.btn-send{background:var(--blue);color:var(--white);border:none;border-radius:7px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer}
+.btn-send:hover{background:var(--blue-mid)}
+.success-msg{display:none;background:var(--blue-pale);color:var(--blue);border-radius:7px;padding:11px 14px;font-size:13.5px;margin-top:8px}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--gray-200);background:var(--white)}
+.footer-main{display:grid;grid-template-columns:280px 1fr 1fr 1fr;gap:40px;padding:52px 48px 40px}
+.footer-brand p{font-size:13.5px;color:var(--gray-400);line-height:1.7;max-width:240px;margin-top:10px}
+.footer-brand .brand-name{font-size:17px;font-weight:700;color:var(--blue)}
+.footer-col h4{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gray-400);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.footer-col h4::before{content:'';display:block;width:3px;height:13px;background:var(--blue);border-radius:2px}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:12px}
+.footer-col ul li a{font-size:14px;color:var(--gray-500);text-decoration:none;cursor:pointer;transition:color .15s}
+.footer-col ul li a:hover{color:var(--blue)}
+.footer-bottom{border-top:1px solid var(--gray-200);padding:16px 48px;display:flex;align-items:center;justify-content:space-between}
+.footer-copy{font-size:12.5px;color:var(--gray-400)}
+.secure-badge{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gray-400)}
+.sec-dot{width:8px;height:8px;border-radius:2px;background:var(--blue)}
+</style>
+</head>
+<body>
+
+<!-- ═══ SHARED NAV ═══ -->
+<nav id="main-nav">
+  <span class="nav-logo" onclick="showPage('home')">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    SafeUPI
+  </span>
+  <ul class="nav-links">
+    <li><a id="nav-how" onclick="showPage('how')">How it Works</a></li>
+    <li><a id="nav-support" onclick="showPage('support')">Support</a></li>
+    <li><a id="nav-about" onclick="showPage('home')" class="active">About Us</a></li>
+  </ul>
+  <button class="btn-primary" onclick="showPage('download')">Download App</button>
+</nav>
+
+
+<!-- ════════════════════════════════════════════
+     HOME / ABOUT PAGE
+════════════════════════════════════════════ -->
+<div id="page-home" class="page active">
+
+  <div class="about-hero">
+    <h1>Digital Fortification through Clarity</h1>
+    <p>We believe financial security shouldn't require a degree in cryptography. SafeUPI exists to eliminate UPI fraud by making transaction security transparent, intuitive, and unbreakable.</p>
+    <div class="hero-actions">
+      <button class="btn-hero" onclick="showPage('download')">Download App</button>
+      <button class="btn-ghost" onclick="showPage('how')">See how it works →</button>
+    </div>
+    <div class="hero-badges">
+      <span class="badge"><span class="badge-dot"></span>Zero-trust architecture</span>
+      <span class="badge"><span class="badge-dot"></span>Real-time threat intelligence</span>
+      <span class="badge"><span class="badge-dot"></span>Biometric authentication</span>
+    </div>
+  </div>
+
+  <div class="section-wrap">
+    <!-- Our Story -->
+    <h2 class="section-header">Our Story</h2>
+    <hr class="section-divider"/>
+    <div class="story-card">
+      <div class="story-text">
+        <h3>The Origin of SafeUPI</h3>
+        <p>Founded in 2022 by a team of cybersecurity veterans and fintech innovators, SafeUPI was born out of a stark realization: while digital payments were becoming universal, the security paradigms protecting them remained archaic. We saw millions losing trust in the very systems designed to empower them.</p>
+        <p>Our initial prototype focused entirely on heuristic analysis of transaction metadata. Today, SafeUPI employs real-time threat intelligence, biometric authentication, and decentralized verification ledgers to ensure every transfer is authenticated before it leaves your device.</p>
+      </div>
+      <div class="story-img">
+        <div class="story-img-inner">
+          <svg viewBox="0 0 360 280" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+            <defs>
+              <radialGradient id="glow" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#1e40af" stop-opacity=".6"/><stop offset="100%" stop-color="#0c1a2e" stop-opacity="0"/></radialGradient>
+              <linearGradient id="s1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#0d3a6e"/><stop offset="100%" stop-color="#071e3a"/></linearGradient>
+            </defs>
+            <ellipse cx="180" cy="140" rx="150" ry="95" fill="url(#glow)"/>
+            <rect x="18" y="62" width="120" height="86" rx="4" fill="url(#s1)" stroke="#1e3a6e" stroke-width="1.5"/>
+            <rect x="18" y="62" width="120" height="8" rx="4" fill="#1e3a6e"/>
+            <polyline points="28,128 46,113 64,120 82,103 100,110 130,93" fill="none" stroke="#3B82F6" stroke-width="1.5" opacity=".9"/>
+            <rect x="28" y="72" width="38" height="3" rx="1.5" fill="#2563EB" opacity=".8"/>
+            <rect x="28" y="79" width="26" height="2" rx="1" fill="#3B82F6" opacity=".5"/>
+            <rect x="74" y="148" width="12" height="14" rx="2" fill="#0a1628"/>
+            <rect x="62" y="161" width="36" height="4" rx="2" fill="#0d1f38"/>
+            <rect x="98" y="32" width="164" height="124" rx="4" fill="url(#s1)" stroke="#1e3a6e" stroke-width="2"/>
+            <rect x="98" y="32" width="164" height="10" rx="4" fill="#1a3560"/>
+            <polyline points="112,133 130,113 150,123 170,98 190,106 210,86 232,93 254,76" fill="none" stroke="#3B82F6" stroke-width="2" opacity=".95"/>
+            <polygon points="112,158 130,113 150,123 170,98 190,106 210,86 232,93 254,76 254,158" fill="#3B82F6" opacity=".07"/>
+            <circle cx="170" cy="98" r="3" fill="#60a5fa"/>
+            <circle cx="210" cy="86" r="3" fill="#93c5fd"/>
+            <circle cx="254" cy="76" r="4" fill="#3B82F6" stroke="#93c5fd" stroke-width="1.5"/>
+            <rect x="110" y="42" width="55" height="4" rx="2" fill="#2563EB" opacity=".8"/>
+            <rect x="180" y="156" width="12" height="18" rx="2" fill="#0a1628"/>
+            <rect x="166" y="173" width="40" height="5" rx="2.5" fill="#0d1f38"/>
+            <rect x="222" y="72" width="120" height="86" rx="4" fill="url(#s1)" stroke="#1e3a6e" stroke-width="1.5"/>
+            <rect x="222" y="72" width="120" height="8" rx="4" fill="#1e3a6e"/>
+            <rect x="240" y="118" width="11" height="26" rx="2" fill="#2563EB" opacity=".8"/>
+            <rect x="256" y="106" width="11" height="38" rx="2" fill="#3B82F6" opacity=".9"/>
+            <rect x="272" y="113" width="11" height="31" rx="2" fill="#2563EB" opacity=".7"/>
+            <rect x="288" y="101" width="11" height="43" rx="2" fill="#60a5fa" opacity=".85"/>
+            <rect x="304" y="110" width="11" height="34" rx="2" fill="#3B82F6" opacity=".8"/>
+            <line x1="232" y1="148" x2="332" y2="148" stroke="#1e3a6e" stroke-width="1"/>
+            <rect x="276" y="158" width="12" height="14" rx="2" fill="#0a1628"/>
+            <rect x="264" y="171" width="36" height="4" rx="2" fill="#0d1f38"/>
+            <ellipse cx="180" cy="212" rx="13" ry="13" fill="#07192e"/>
+            <rect x="163" y="224" width="34" height="38" rx="7" fill="#07192e"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Our Values -->
+    <div style="margin-top:60px">
+      <h2 class="section-header">Our Values</h2>
+      <hr class="section-divider"/>
+      <div class="values-grid">
+        <div class="value-card">
+          <div class="value-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h3>Uncompromising Security</h3>
+          <p>Security is not a feature; it is the foundation. We employ zero-trust architecture across all layers of our application to guarantee data integrity.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </div>
+          <h3>Absolute Clarity</h3>
+          <p>We banish ambiguity. Every security status, warning, and transaction detail is presented with explicit clarity to prevent user error.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <h3>Proactive Defense</h3>
+          <p>We don't wait for fraud to happen. Our systems are designed to intercept and neutralize anomalous patterns before a transaction initiates.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-main">
+      <div class="footer-brand">
+        <span class="brand-name">SafeUPI</span>
+        <p>Making UPI transactions transparent, intuitive, and unbreakable for every Indian.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a onclick="showPage('how')">How it Works</a></li>
+          <li><a onclick="showPage('features')">Features</a></li>
+          <li><a onclick="showPage('download')">Download App</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a onclick="showPage('home')">About Us</a></li>
+          <li><a onclick="showPage('support')">Support</a></li>
+          <li><a onclick="showPage('support')">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a onclick="showPage('privacy')">Privacy Policy</a></li>
+          <li><a onclick="showPage('terms')">Terms of Service</a></li>
+          <li><a onclick="showPage('security')">Security Disclosure</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2024 SafeUPI. All rights reserved.</span>
+      <div class="secure-badge"><span class="sec-dot"></span>256-bit encrypted</div>
+    </div>
+  </footer>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     HOW IT WORKS
+════════════════════════════════════════════ -->
+<div id="page-how" class="page">
+  <div class="section-wrap" style="padding-top:56px">
+    <button class="back-btn" onclick="showPage('home')">← Back to home</button>
+    <div class="page-eyebrow">How it Works</div>
+    <h1 style="font-size:34px;font-weight:700;margin-bottom:10px">Fraud protection that works before you even tap send</h1>
+    <p style="font-size:16px;color:var(--gray-500);margin-bottom:48px;max-width:560px">SafeUPI intercepts threats at every stage — before, during, and after your UPI transaction.</p>
+
+    <h2 class="section-header">The 6-step protection flow</h2>
+    <hr class="section-divider"/>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">STEP 01</div>
+        <div class="step-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <h3>Recipient scan</h3>
+        <p>Before you confirm, SafeUPI scans the recipient UPI ID against our live fraud registry — updated every 60 seconds from RBI alerts and partner bank feeds.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">STEP 02</div>
+        <div class="step-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+        <h3>Behavioural baseline</h3>
+        <p>Our on-device AI builds a model of your normal transaction patterns. Any deviation — unusual amount, new recipient, odd hour — triggers a risk score instantly.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">STEP 03</div>
+        <div class="step-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Biometric lock</h3>
+        <p>Every transaction above ₹500 requires biometric confirmation — fingerprint or face ID. Your biometric never leaves your device.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">STEP 04</div>
+        <div class="step-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <h3>Real-time interception</h3>
+        <p>If a high-risk signal is detected mid-transaction, SafeUPI can hold the payment for up to 30 seconds while you review the alert — before funds leave your account.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">STEP 05</div>
+        <div class="step-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <h3>Decentralised ledger</h3>
+        <p>Every transaction hash is written to a tamper-proof distributed ledger — giving you verifiable proof of every payment and its security status.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-num">STEP 06</div>
+        <div class="step-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.68 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.59 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+        <h3>Post-transaction alert</h3>
+        <p>After every payment, you receive a clear security receipt — risk level, recipient verification status, and the ledger reference ID. No more ambiguity.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:48px">
+      <h2 class="section-header">What makes us different</h2>
+      <hr class="section-divider"/>
+      <div class="feature-row">
+        <div class="feature-card">
+          <h3><span class="f-badge">On-device</span> AI that never leaves your phone</h3>
+          <p>Our threat model runs entirely on your device. Your transaction data is never sent to a cloud server for analysis — privacy by architecture, not just policy.</p>
+        </div>
+        <div class="feature-card">
+          <h3><span class="f-badge">Live</span> 60-second fraud registry refresh</h3>
+          <p>Most fraud databases update daily. Ours refreshes every 60 seconds from RBI alerts, NPCI signals, and a consortium of partner banks.</p>
+        </div>
+        <div class="feature-card">
+          <h3><span class="f-badge">Zero-trust</span> Every layer verified</h3>
+          <p>We don't trust the network, the app layer, or even the device OS. Every security assertion is independently verified end-to-end.</p>
+        </div>
+        <div class="feature-card">
+          <h3><span class="f-badge">UPI-native</span> Works with any UPI app</h3>
+          <p>SafeUPI sits as a transparent security layer — it works alongside PhonePe, GPay, Paytm, and any BHIM-UPI app without replacing them.</p>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:48px">
+      <button class="btn-hero" onclick="showPage('download')">Download SafeUPI — Free</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-main">
+      <div class="footer-brand"><span class="brand-name">SafeUPI</span><p>Making UPI transactions transparent, intuitive, and unbreakable for every Indian.</p></div>
+      <div class="footer-col"><h4>Product</h4><ul><li><a onclick="showPage('how')">How it Works</a></li><li><a onclick="showPage('features')">Features</a></li><li><a onclick="showPage('download')">Download App</a></li></ul></div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a onclick="showPage('home')">About Us</a></li><li><a onclick="showPage('support')">Support</a></li><li><a onclick="showPage('support')">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Legal</h4><ul><li><a onclick="showPage('privacy')">Privacy Policy</a></li><li><a onclick="showPage('terms')">Terms of Service</a></li><li><a onclick="showPage('security')">Security Disclosure</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span class="footer-copy">© 2024 SafeUPI. All rights reserved.</span><div class="secure-badge"><span class="sec-dot"></span>256-bit encrypted</div></div>
+  </footer>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     SUPPORT / FAQ
+════════════════════════════════════════════ -->
+<div id="page-support" class="page">
+  <div class="simple-page">
+    <button class="back-btn" onclick="showPage('home')">← Back to home</button>
+    <div class="page-eyebrow">Support</div>
+    <h1>How can we help?</h1>
+    <p class="last-upd" style="margin-bottom:32px">Browse our FAQ or get in touch directly.</p>
+
+    <div class="prose"><h2>Frequently asked questions</h2></div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">What is SafeUPI and how does it work? <span class="chevron">▼</span></button>
+        <div class="faq-a">SafeUPI is a fraud protection layer for UPI transactions. It scans recipients against a live fraud registry, runs on-device behavioural analysis, requires biometric confirmation, and gives you a security receipt for every payment — all without replacing your existing UPI app.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Is SafeUPI free to use? <span class="chevron">▼</span></button>
+        <div class="faq-a">Yes, the core SafeUPI protection layer is completely free. A SafeUPI Pro plan (coming soon) will include advanced analytics, family account monitoring, and priority dispute support.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Does SafeUPI replace my current UPI app? <span class="chevron">▼</span></button>
+        <div class="faq-a">No. SafeUPI works alongside PhonePe, Google Pay, Paytm, BHIM, and any other UPI app as a transparent security layer. You don't need to change how you pay.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Can SafeUPI see my transaction details? <span class="chevron">▼</span></button>
+        <div class="faq-a">No. Our threat analysis runs entirely on your device. Your transaction data is never sent to our servers in readable form. We use zero-knowledge proofs to validate risk without seeing the underlying data.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">What happens if SafeUPI flags a payment by mistake? <span class="chevron">▼</span></button>
+        <div class="faq-a">You remain in full control. SafeUPI shows you the risk reason and gives you the option to proceed anyway. False positives can be reported in-app, which improves the model for all users.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">How do I report a fraudulent UPI ID? <span class="chevron">▼</span></button>
+        <div class="faq-a">Tap "Report fraud" on any transaction in the SafeUPI app. Reports are reviewed within 2 hours and submitted to NPCI and the relevant bank automatically.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">Which devices and OS versions are supported? <span class="chevron">▼</span></button>
+        <div class="faq-a">SafeUPI supports Android 8.0+ and iOS 14+. Biometric features require a device with fingerprint or Face ID hardware.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">How do I delete my SafeUPI account and data? <span class="chevron">▼</span></button>
+        <div class="faq-a">Go to Settings → Account → Delete account in the app. All your data is permanently deleted within 24 hours. You can also email privacy@safeupi.in to request deletion.</div>
+      </div>
+    </div>
+
+    <div style="margin-top:48px" class="prose"><h2>Get in touch</h2></div>
+    <div class="contact-grid">
+      <div class="contact-card">
+        <h3>Email support</h3>
+        <p>For account issues, fraud reports, or general questions. We respond within one business day.</p>
+        <a href="mailto:support@safeupi.in">support@safeupi.in</a>
+        <br/><br/>
+        <h3 style="margin-top:0">Security issues</h3>
+        <p style="margin-top:8px">Found a vulnerability? Responsible disclosure is rewarded.</p>
+        <a href="mailto:security@safeupi.in">security@safeupi.in</a>
+      </div>
+      <div class="contact-card">
+        <h3>Send us a message</h3>
+        <div class="contact-form">
+          <input type="text" placeholder="Your name" id="c-name"/>
+          <input type="email" placeholder="Email address" id="c-email"/>
+          <textarea placeholder="How can we help?" id="c-msg"></textarea>
+          <button class="btn-send" onclick="sendMsg()">Send message</button>
+          <div class="success-msg" id="c-success">✓ Message received — we'll reply within one business day.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-main">
+      <div class="footer-brand"><span class="brand-name">SafeUPI</span><p>Making UPI transactions transparent, intuitive, and unbreakable for every Indian.</p></div>
+      <div class="footer-col"><h4>Product</h4><ul><li><a onclick="showPage('how')">How it Works</a></li><li><a onclick="showPage('features')">Features</a></li><li><a onclick="showPage('download')">Download App</a></li></ul></div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a onclick="showPage('home')">About Us</a></li><li><a onclick="showPage('support')">Support</a></li><li><a onclick="showPage('support')">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Legal</h4><ul><li><a onclick="showPage('privacy')">Privacy Policy</a></li><li><a onclick="showPage('terms')">Terms of Service</a></li><li><a onclick="showPage('security')">Security Disclosure</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span class="footer-copy">© 2024 SafeUPI. All rights reserved.</span><div class="secure-badge"><span class="sec-dot"></span>256-bit encrypted</div></div>
+  </footer>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     PRIVACY POLICY
+════════════════════════════════════════════ -->
+<div id="page-privacy" class="page">
+  <div class="simple-page">
+    <button class="back-btn" onclick="showPage('home')">← Back to home</button>
+    <div class="page-eyebrow">Legal</div>
+    <h1>Privacy Policy</h1>
+    <p class="last-upd">Last updated: October 26, 2024.</p>
+    <div class="prose">
+      <div class="highlight"><p>SafeUPI's threat analysis runs on your device. Your transaction data is never sent to our servers in readable form. We do not sell your data — ever.</p></div>
+      <h2>What we collect</h2>
+      <ul>
+        <li><strong>Account information</strong> — name, phone number, and email used to create your SafeUPI account.</li>
+        <li><strong>Device identifiers</strong> — anonymous device ID used to maintain your security model across sessions. Not linked to your identity.</li>
+        <li><strong>Aggregate risk signals</strong> — anonymised, hashed transaction metadata (amount range, time-of-day, recipient hash) used only to update your on-device behavioural model.</li>
+        <li><strong>Fraud reports</strong> — UPI IDs and amounts you voluntarily report as fraudulent. Shared with NPCI and partner banks.</li>
+      </ul>
+      <h2>What we never collect</h2>
+      <ul>
+        <li>Your UPI PIN or bank credentials — ever, under any circumstance.</li>
+        <li>Readable transaction amounts, recipient names, or bank account numbers.</li>
+        <li>Location data beyond city-level (used only for fraud pattern mapping).</li>
+        <li>Any biometric data — biometrics are processed by your device OS and never reach SafeUPI.</li>
+      </ul>
+      <h2>How we use your data</h2>
+      <ul>
+        <li>To maintain and improve the on-device fraud detection model.</li>
+        <li>To update the live fraud registry shared across the SafeUPI network.</li>
+        <li>To send security alerts and account notifications.</li>
+        <li>To comply with RBI and NPCI reporting obligations.</li>
+      </ul>
+      <h2>Data sharing</h2>
+      <p>We share anonymised fraud signals with NPCI, RBI, and partner banks as required by law. We do not share any personally identifiable information with advertisers, data brokers, or third-party analytics providers.</p>
+      <h2>Data retention</h2>
+      <p>Account data is retained while your account is active and deleted within 24 hours of account deletion. Anonymised fraud signals are retained for up to 24 months for model training.</p>
+      <h2>Your rights</h2>
+      <ul>
+        <li>Access or export your account data — Settings → Privacy → Export data.</li>
+        <li>Delete your account and all associated data — Settings → Account → Delete account.</li>
+        <li>Opt out of aggregate model training — Settings → Privacy → Opt out.</li>
+      </ul>
+      <p>Questions? Email <a href="mailto:privacy@safeupi.in" style="color:var(--blue)">privacy@safeupi.in</a>.</p>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-main">
+      <div class="footer-brand"><span class="brand-name">SafeUPI</span><p>Making UPI transactions transparent, intuitive, and unbreakable for every Indian.</p></div>
+      <div class="footer-col"><h4>Product</h4><ul><li><a onclick="showPage('how')">How it Works</a></li><li><a onclick="showPage('features')">Features</a></li><li><a onclick="showPage('download')">Download App</a></li></ul></div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a onclick="showPage('home')">About Us</a></li><li><a onclick="showPage('support')">Support</a></li><li><a onclick="showPage('support')">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Legal</h4><ul><li><a onclick="showPage('privacy')">Privacy Policy</a></li><li><a onclick="showPage('terms')">Terms of Service</a></li><li><a onclick="showPage('security')">Security Disclosure</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span class="footer-copy">© 2024 SafeUPI. All rights reserved.</span><div class="secure-badge"><span class="sec-dot"></span>256-bit encrypted</div></div>
+  </footer>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     TERMS OF SERVICE
+════════════════════════════════════════════ -->
+<div id="page-terms" class="page">
+  <div class="terms-page">
+    <button class="back-btn" onclick="showPage('home')">← Back to home</button>
+    <span class="legal-badge">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Legal Document
+    </span>
+    <h1>Terms and Conditions</h1>
+    <p class="last-updated">Last updated: October 26, 2024. Please read these terms carefully before using the SafeUPI service.</p>
+
+    <div class="terms-layout">
+      <aside class="terms-toc">
+        <div class="toc-label">Contents</div>
+        <ol>
+          <li><a href="#">1. Acceptance of Terms</a></li>
+          <li><a href="#">2. User Responsibilities</a></li>
+          <li><a href="#">3. Limitations of Liability</a></li>
+          <li><a href="#">4. Intellectual Property</a></li>
+          <li><a href="#">5. Governing Law</a></li>
+        </ol>
+      </aside>
+      <div class="terms-sections">
+        <div class="terms-section-card">
+          <h2 class="terms-section-title">
+            <svg class="s-icon" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            1. Acceptance of Terms
+          </h2>
+          <p>By downloading or using the SafeUPI application, you agree to be bound by these Terms and Conditions. If you disagree with any part, you may not use the service.</p>
+          <p>These Terms apply to all visitors, users, and others who access or use the Service.</p>
+          <div class="terms-blockquote"><p>Use of SafeUPI requires adherence to all applicable RBI, NPCI, and local financial regulations and compliance standards.</p></div>
+        </div>
+        <div class="terms-section-card">
+          <h2 class="terms-section-title">
+            <svg class="s-icon" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            2. User Responsibilities
+          </h2>
+          <p>You are responsible for maintaining the confidentiality of your account and for all activities that occur under it.</p>
+          <ul class="terms-list">
+            <li>You agree to accept responsibility for all activities or actions that occur under your account.</li>
+            <li>You must notify us immediately of any breach of security or unauthorised use of your account.</li>
+            <li>You must not attempt to reverse-engineer, tamper with, or circumvent SafeUPI's security mechanisms.</li>
+            <li>You must not use SafeUPI to facilitate or conceal fraudulent transactions.</li>
+          </ul>
+        </div>
+        <div class="terms-section-card">
+          <h2 class="terms-section-title">
+            <svg class="s-icon" viewBox="0 0 24 24" fill="none" stroke="#E57373" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            3. Limitations of Liability
+          </h2>
+          <p>SafeUPI is a fraud detection and prevention tool. We do not guarantee that all fraudulent transactions will be intercepted. In no event shall SafeUPI be liable for any indirect, incidental, or consequential damages resulting from:</p>
+          <div class="liability-grid">
+            <div class="liability-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <p>Inability to access or use the Service at any time.</p>
+            </div>
+            <div class="liability-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <p>Unauthorised access or alteration of your transmissions.</p>
+            </div>
+            <div class="liability-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              <p>Transactions that bypass detection despite reasonable measures.</p>
+            </div>
+            <div class="liability-item">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <p>Service interruptions caused by third-party infrastructure.</p>
+            </div>
+          </div>
+        </div>
+        <div class="terms-section-card">
+          <h2 class="terms-section-title">
+            <svg class="s-icon" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83m13.79-4l-5.74 9.94"/></svg>
+            4. Intellectual Property
+          </h2>
+          <p>The Service and its original content, features, and functionality are the exclusive property of SafeUPI and its licensors. The brand, code, and algorithms are protected under applicable intellectual property laws.</p>
+          <p>SafeUPI trademarks and trade dress may not be used without prior written consent.</p>
+        </div>
+        <div class="terms-section-card">
+          <h2 class="terms-section-title">
+            <svg class="s-icon" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            5. Governing Law
+          </h2>
+          <p>These Terms are governed by the laws of India. Any disputes shall be subject to the exclusive jurisdiction of the courts of Bengaluru, Karnataka.</p>
+          <p>SafeUPI complies with the Information Technology Act, 2000 and the Digital Personal Data Protection Act, 2023.</p>
+        </div>
+      </div>
+    </div>
+    <div class="terms-agree-wrap">
+      <button class="btn-agree" onclick="showPage('home')">I Have Read and Agree</button>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-main">
+      <div class="footer-brand"><span class="brand-name">SafeUPI</span><p>Making UPI transactions transparent, intuitive, and unbreakable for every Indian.</p></div>
+      <div class="footer-col"><h4>Product</h4><ul><li><a onclick="showPage('how')">How it Works</a></li><li><a onclick="showPage('features')">Features</a></li><li><a onclick="showPage('download')">Download App</a></li></ul></div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a onclick="showPage('home')">About Us</a></li><li><a onclick="showPage('support')">Support</a></li><li><a onclick="showPage('support')">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Legal</h4><ul><li><a onclick="showPage('privacy')">Privacy Policy</a></li><li><a onclick="showPage('terms')">Terms of Service</a></li><li><a onclick="showPage('security')">Security Disclosure</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span class="footer-copy">© 2024 SafeUPI. All rights reserved.</span><div class="secure-badge"><span class="sec-dot"></span>256-bit encrypted</div></div>
+  </footer>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     SECURITY DISCLOSURE
+════════════════════════════════════════════ -->
+<div id="page-security" class="page">
+  <div class="simple-page">
+    <button class="back-btn" onclick="showPage('home')">← Back to home</button>
+    <div class="page-eyebrow">Security</div>
+    <h1>Security Disclosure</h1>
+    <p class="last-upd">Responsible disclosure policy · Last updated: October 2024.</p>
+    <div class="prose">
+      <div class="highlight"><p>SafeUPI takes security seriously. If you've found a vulnerability, we want to hear from you. Responsible disclosure is rewarded.</p></div>
+      <h2>Our security architecture</h2>
+      <ul>
+        <li><strong>Zero-trust model</strong> — every request is authenticated and authorised independently, regardless of network origin.</li>
+        <li><strong>On-device processing</strong> — fraud analysis runs locally. Transaction data is never sent to our servers in readable form.</li>
+        <li><strong>End-to-end encryption</strong> — all data in transit uses TLS 1.3. Data at rest is AES-256 encrypted.</li>
+        <li><strong>Decentralised ledger</strong> — transaction hashes are written to a tamper-proof distributed ledger for auditability.</li>
+        <li><strong>Biometric isolation</strong> — biometric data is processed by the device OS (Android Keystore / iOS Secure Enclave) and never accessed by SafeUPI.</li>
+      </ul>
+      <h2>Responsible disclosure policy</h2>
+      <p>If you discover a security vulnerability in SafeUPI, please report it to us privately before public disclosure. We commit to:</p>
+      <ul>
+        <li>Acknowledging your report within 48 hours.</li>
+        <li>Providing a status update within 7 days.</li>
+        <li>Patching confirmed vulnerabilities within 30 days (critical issues within 72 hours).</li>
+        <li>Publicly crediting you (with your permission) after the fix is released.</li>
+        <li>Rewarding significant findings through our bug bounty programme.</li>
+      </ul>
+      <h2>What to include in your report</h2>
+      <ul>
+        <li>A clear description of the vulnerability and its potential impact.</li>
+        <li>Steps to reproduce the issue.</li>
+        <li>Any proof-of-concept code or screenshots (please do not access real user data).</li>
+        <li>Your preferred contact method for follow-up.</li>
+      </ul>
+      <h2>Out of scope</h2>
+      <ul>
+        <li>Social engineering attacks against SafeUPI staff.</li>
+        <li>Physical attacks against infrastructure.</li>
+        <li>Denial-of-service attacks.</li>
+        <li>Vulnerabilities in third-party UPI apps or bank infrastructure.</li>
+      </ul>
+      <h2>Contact</h2>
+      <p>Email your report to <a href="mailto:security@safeupi.in" style="color:var(--blue)">security@safeupi.in</a>. For highly sensitive findings, request our PGP key at that address first.</p>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-main">
+      <div class="footer-brand"><span class="brand-name">SafeUPI</span><p>Making UPI transactions transparent, intuitive, and unbreakable for every Indian.</p></div>
+      <div class="footer-col"><h4>Product</h4><ul><li><a onclick="showPage('how')">How it Works</a></li><li><a onclick="showPage('features')">Features</a></li><li><a onclick="showPage('download')">Download App</a></li></ul></div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a onclick="showPage('home')">About Us</a></li><li><a onclick="showPage('support')">Support</a></li><li><a onclick="showPage('support')">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Legal</h4><ul><li><a onclick="showPage('privacy')">Privacy Policy</a></li><li><a onclick="showPage('terms')">Terms of Service</a></li><li><a onclick="showPage('security')">Security Disclosure</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span class="footer-copy">© 2024 SafeUPI. All rights reserved.</span><div class="secure-badge"><span class="sec-dot"></span>256-bit encrypted</div></div>
+  </footer>
+</div>
+
+
+<!-- ════════════════════════════════════════════
+     DOWNLOAD APP
+════════════════════════════════════════════ -->
+<div id="page-download" class="page">
+  <div class="simple-page" style="text-align:center">
+    <button class="back-btn" onclick="showPage('home')" style="margin:0 auto 36px">← Back to home</button>
+    <div class="page-eyebrow">Get the app</div>
+    <h1>Download SafeUPI</h1>
+    <p style="font-size:16px;color:var(--gray-500);max-width:480px;margin:10px auto 48px;line-height:1.7">Free to download. Works alongside any UPI app. Protection starts the moment you install it.</p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-bottom:40px">
+      <button class="btn-hero" onclick="alert('Opening App Store…')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right:8px;vertical-align:-2px"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        App Store
+      </button>
+      <button class="btn-hero" onclick="alert('Opening Google Play…')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right:8px;vertical-align:-2px"><path d="M3.18 23.76c.39.21.83.24 1.24.09l.06-.03 10.72-6.19-2.38-2.38-9.64 8.51zm-1.84-19.7A2 2 0 0 0 1 5.33v13.34c0 .48.14.92.37 1.28l.07.08 7.47-7.47v-.17L1.34 4.06zm18.97 7.94-2.83-1.63-2.67 2.67 2.67 2.67 2.84-1.64c.81-.47.81-1.6-.01-2.07zM4.42.33L14.14 7.2 11.76 9.58l-9.64-8.52c.42-.16.89-.13 1.3.1z"/></svg>
+        Google Play
+      </button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap">
+      <span class="badge"><span class="badge-dot"></span>Free — no subscription</span>
+      <span class="badge"><span class="badge-dot"></span>Android 8.0+ · iOS 14+</span>
+      <span class="badge"><span class="badge-dot"></span>4.8 ★ on Play Store</span>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-main">
+      <div class="footer-brand"><span class="brand-name">SafeUPI</span><p>Making UPI transactions transparent, intuitive, and unbreakable for every Indian.</p></div>
+      <div class="footer-col"><h4>Product</h4><ul><li><a onclick="showPage('how')">How it Works</a></li><li><a onclick="showPage('features')">Features</a></li><li><a onclick="showPage('download')">Download App</a></li></ul></div>
+      <div class="footer-col"><h4>Company</h4><ul><li><a onclick="showPage('home')">About Us</a></li><li><a onclick="showPage('support')">Support</a></li><li><a onclick="showPage('support')">Contact</a></li></ul></div>
+      <div class="footer-col"><h4>Legal</h4><ul><li><a onclick="showPage('privacy')">Privacy Policy</a></li><li><a onclick="showPage('terms')">Terms of Service</a></li><li><a onclick="showPage('security')">Security Disclosure</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><span class="footer-copy">© 2024 SafeUPI. All rights reserved.</span><div class="secure-badge"><span class="sec-dot"></span>256-bit encrypted</div></div>
+  </footer>
+</div>
+
+
+<script>
+const NAV_MAP = { home:'about', how:'how', support:'support' };
+
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  // update nav active state
+  ['how','support','about'].forEach(id => {
+    document.getElementById('nav-' + id)?.classList.remove('active');
+  });
+  if (name === 'home') document.getElementById('nav-about')?.classList.add('active');
+  if (name === 'how')  document.getElementById('nav-how')?.classList.add('active');
+  if (name === 'support') document.getElementById('nav-support')?.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleFaq(btn) {
+  const answer = btn.nextElementSibling;
+  const isOpen = answer.classList.contains('open');
+  document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+  document.querySelectorAll('.faq-q').forEach(b => b.classList.remove('open'));
+  if (!isOpen) { answer.classList.add('open'); btn.classList.add('open'); }
+}
+
+function sendMsg() {
+  const name  = document.getElementById('c-name').value.trim();
+  const email = document.getElementById('c-email').value.trim();
+  const msg   = document.getElementById('c-msg').value.trim();
+  if (!name || !email || !msg) { alert('Please fill in all fields.'); return; }
+  document.getElementById('c-success').style.display = 'block';
+  document.getElementById('c-name').value  = '';
+  document.getElementById('c-email').value = '';
+  document.getElementById('c-msg').value   = '';
+}
+</script>
+</body>
+</html>
