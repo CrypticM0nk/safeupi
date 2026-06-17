@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SafeUPI – SMS Fraud Detection & Alert System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:      #0D1117;
+      --ink-soft: #3D4A5C;
+      --ink-mute: #7A8899;
+      --surface:  #F5F7FA;
+      --white:    #FFFFFF;
+      --border:   #E3E8EF;
+      --blue:     #1B4FD8;
+      --blue-lt:  #EEF3FF;
+      --amber:    #D97706;
+      --amber-lt: #FEF3C7;
+      --red:      #DC2626;
+      --red-lt:   #FEE2E2;
+      --green:    #059669;
+      --green-lt: #D1FAE5;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--ink);
+      background: var(--white);
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; inset: 0 0 auto;
+      z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%;
+      height: 64px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 9px;
+      text-decoration: none;
+    }
+    .brand-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: var(--ink);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .brand-name {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.2rem; font-weight: 700; color: var(--ink); letter-spacing: -0.01em;
+    }
+    .brand-name span { color: var(--blue); }
+
+    .nav-links {
+      display: flex; align-items: center; gap: 28px; list-style: none;
+    }
+    .nav-links a {
+      text-decoration: none; color: var(--ink-soft);
+      font-size: 0.9rem; font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--ink); }
+    .nav-cta {
+      background: var(--ink) !important; color: var(--white) !important;
+      padding: 9px 20px; border-radius: 8px;
+      font-weight: 600 !important;
+    }
+    .nav-cta:hover { background: var(--blue) !important; }
+
+    .nav-burger {
+      display: none; cursor: pointer;
+      flex-direction: column; gap: 5px; padding: 4px;
+    }
+    .nav-burger span { display: block; width: 22px; height: 2px; background: var(--ink); border-radius: 2px; transition: .25s; }
+
+    /* ─── HERO ─── */
+    #hero {
+      padding: 120px 5% 80px;
+      background: var(--white);
+      display: flex; align-items: center; min-height: 100vh;
+    }
+    .hero-wrap {
+      max-width: 1120px; margin: 0 auto; width: 100%;
+      display: grid; grid-template-columns: 1fr 480px; gap: 72px; align-items: center;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 7px;
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--blue);
+      background: var(--blue-lt); border-radius: 50px; padding: 5px 13px;
+      margin-bottom: 22px;
+    }
+
+    .hero-h1 {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(2.4rem, 4.5vw, 3.8rem);
+      line-height: 1.1; letter-spacing: -0.02em;
+      color: var(--ink); margin-bottom: 22px;
+    }
+    .hero-h1 em { font-style: italic; color: var(--blue); }
+
+    .hero-p {
+      font-size: 1.05rem; color: var(--ink-soft);
+      max-width: 500px; line-height: 1.8; margin-bottom: 38px;
+    }
+
+    .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-dark {
+      background: var(--ink); color: var(--white);
+      padding: 13px 28px; border-radius: 9px;
+      font-size: 0.93rem; font-weight: 600;
+      text-decoration: none; display: inline-block;
+      transition: background .2s, transform .15s;
+    }
+    .btn-dark:hover { background: var(--blue); transform: translateY(-1px); }
+    .btn-ghost {
+      background: transparent; color: var(--ink);
+      padding: 13px 26px; border-radius: 9px;
+      font-size: 0.93rem; font-weight: 600;
+      text-decoration: none; display: inline-block;
+      border: 1.5px solid var(--border);
+      transition: border-color .2s, color .2s;
+    }
+    .btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
+
+    /* ── Phone mockup ── */
+    .phone-wrap { display: flex; justify-content: center; position: relative; }
+
+    .phone {
+      width: 248px;
+      background: #181C22;
+      border-radius: 38px;
+      padding: 11px;
+      box-shadow:
+        0 2px 0 #3A3F48,
+        0 32px 72px rgba(0,0,0,0.32),
+        inset 0 0 0 1px rgba(255,255,255,0.06);
+    }
+    .phone-screen {
+      background: #0D1117;
+      border-radius: 28px;
+      min-height: 500px;
+      padding: 18px 14px 20px;
+      display: flex; flex-direction: column; gap: 10px;
+      overflow: hidden; position: relative;
+    }
+    .ps-bar {
+      display: flex; justify-content: space-between;
+      font-size: 0.6rem; color: rgba(255,255,255,0.3); padding: 0 2px;
+    }
+    .ps-title {
+      font-size: 0.68rem; font-weight: 600; color: rgba(255,255,255,0.35);
+      text-align: center; text-transform: uppercase; letter-spacing: 0.1em;
+      padding: 4px 0;
+    }
+
+    /* SMS bubble */
+    .sms-bubble {
+      background: #1A1F29; border-radius: 14px; padding: 12px 13px;
+    }
+    .sms-from {
+      font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.35);
+      margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .sms-text {
+      font-size: 0.68rem; color: rgba(255,255,255,0.65); line-height: 1.6;
+    }
+    .sms-text strong { color: #fff; }
+    .sms-time { font-size: 0.58rem; color: rgba(255,255,255,0.25); margin-top: 6px; text-align: right; }
+
+    /* Divider */
+    .ps-divider {
+      display: flex; align-items: center; gap: 8px;
+    }
+    .ps-divider::before, .ps-divider::after {
+      content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07);
+    }
+    .ps-divider span {
+      font-size: 0.58rem; color: rgba(255,255,255,0.2); white-space: nowrap;
+    }
+
+    /* Alert card on phone */
+    .phone-alert {
+      border-radius: 14px; padding: 13px;
+      background: linear-gradient(135deg, rgba(220,38,38,0.18), rgba(220,38,38,0.06));
+      border: 1px solid rgba(220,38,38,0.35);
+    }
+    .pa-header {
+      display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    }
+    .pa-dot { width: 8px; height: 8px; border-radius: 50%; background: #EF4444; flex-shrink: 0;
+      box-shadow: 0 0 0 3px rgba(239,68,68,0.2); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{ box-shadow: 0 0 0 3px rgba(239,68,68,0.2); } 50%{ box-shadow: 0 0 0 6px rgba(239,68,68,0.08); } }
+    .pa-label { font-size: 0.68rem; font-weight: 700; color: #FCA5A5; }
+    .pa-badge {
+      margin-left: auto; background: rgba(239,68,68,0.2);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 5px; padding: 2px 8px;
+      font-size: 0.58rem; font-weight: 700; color: #FCA5A5;
+    }
+    .pa-body {
+      font-size: 0.64rem; color: rgba(255,255,255,0.5); line-height: 1.6; margin-bottom: 10px;
+    }
+    .pa-flags { display: flex; flex-direction: column; gap: 5px; }
+    .pa-flag {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.6rem; color: rgba(255,255,255,0.4);
+    }
+    .pa-flag::before { content: '›'; color: #EF4444; font-weight: 700; }
+
+    /* Float pill */
+    .hero-pill {
+      position: absolute;
+      background: var(--white); border-radius: 50px;
+      padding: 9px 16px; display: flex; align-items: center; gap: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      font-size: 0.78rem; white-space: nowrap;
+    }
+    .hero-pill strong { font-weight: 700; color: var(--ink); }
+    .hero-pill span { color: var(--ink-mute); }
+    .hp1 { top: 14%; right: -40px; }
+    .hp2 { bottom: 18%; left: -50px; }
+    .hp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .hp-dot.green { background: var(--green); }
+    .hp-dot.amber { background: var(--amber); }
+
+    /* ─── SECTIONS ─── */
+    .sec { padding: 96px 5%; }
+    .sec-alt { background: var(--surface); }
+    .sec-inner { max-width: 1100px; margin: 0 auto; }
+
+    .eyebrow {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--blue); margin-bottom: 10px;
+    }
+    .sec-h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: clamp(1.9rem, 3vw, 2.8rem);
+      line-height: 1.15; letter-spacing: -0.02em;
+      color: var(--ink); margin-bottom: 14px;
+    }
+    .sec-sub {
+      font-size: 1rem; color: var(--ink-soft);
+      line-height: 1.8; max-width: 560px;
+    }
+    .sec-head { margin-bottom: 56px; }
+    .centered { text-align: center; }
+    .centered .sec-sub { margin: 0 auto; }
+
+    /* ─── ABOUT ─── */
+    #about { }
+    .about-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center;
+    }
+    .about-visual {
+      background: var(--ink); border-radius: 20px; padding: 32px;
+      display: flex; flex-direction: column; gap: 14px;
+    }
+    .av-label {
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: rgba(255,255,255,0.3);
+    }
+
+    /* SMS stream */
+    .sms-stream { display: flex; flex-direction: column; gap: 10px; }
+    .sms-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .sms-row-icon { font-size: 1rem; padding-top: 1px; flex-shrink: 0; }
+    .sms-row-body { flex: 1; }
+    .sms-row-from { font-size: 0.62rem; font-weight: 700; color: rgba(255,255,255,0.3); margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .sms-row-text { font-size: 0.68rem; color: rgba(255,255,255,0.6); line-height: 1.5; }
+    .sms-row-tag {
+      flex-shrink: 0; padding: 3px 9px; border-radius: 5px;
+      font-size: 0.6rem; font-weight: 700; align-self: center;
+    }
+    .tag-safe { background: rgba(5,150,105,0.15); color: #6EE7B7; }
+    .tag-warn { background: rgba(217,119,6,0.15); color: #FCD34D; }
+    .tag-risk { background: rgba(220,38,38,0.15); color: #FCA5A5; }
+
+    .about-text p {
+      font-size: 0.97rem; color: var(--ink-soft); line-height: 1.85; margin-bottom: 18px;
+    }
+    .about-stats {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 28px;
+    }
+    .about-stat {
+      background: var(--surface); border-radius: 12px; padding: 18px 16px;
+      border: 1px solid var(--border);
+    }
+    .about-stat .val {
+      font-family: 'Sora', sans-serif;
+      font-size: 2rem; color: var(--ink); line-height: 1;
+    }
+    .about-stat .lbl { font-size: 0.75rem; color: var(--ink-mute); margin-top: 4px; }
+
+    /* ─── HOW IT WORKS ─── */
+    #how-it-works { }
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step {
+      display: grid; grid-template-columns: 56px 1fr; gap: 28px;
+      padding-bottom: 40px; position: relative;
+    }
+    .step:not(:last-child)::before {
+      content: '';
+      position: absolute; left: 27px; top: 52px; bottom: 0;
+      width: 2px; background: var(--border);
+    }
+    .step-num-wrap { display: flex; flex-direction: column; align-items: center; padding-top: 2px; }
+    .step-num {
+      width: 56px; height: 56px; border-radius: 14px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Sora', sans-serif; font-size: 1.3rem; font-weight: 400;
+      position: relative; z-index: 1;
+    }
+    .sn-1 { background: var(--blue-lt); color: var(--blue); }
+    .sn-2 { background: var(--surface); color: var(--ink); border: 1.5px solid var(--border); }
+    .sn-3 { background: var(--amber-lt); color: var(--amber); }
+    .sn-4 { background: var(--red-lt); color: var(--red); }
+    .sn-5 { background: var(--green-lt); color: var(--green); }
+
+    .step-content { padding-top: 10px; }
+    .step-content h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.25rem; color: var(--ink); margin-bottom: 8px; letter-spacing: -0.01em;
+    }
+    .step-content p { font-size: 0.93rem; color: var(--ink-soft); line-height: 1.8; max-width: 600px; }
+
+    /* SMS example in step */
+    .sms-example {
+      margin-top: 14px;
+      background: var(--ink); border-radius: 12px; padding: 14px 16px;
+      max-width: 480px;
+    }
+    .sms-ex-from { font-size: 0.62rem; font-weight: 700; color: rgba(255,255,255,0.3); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .sms-ex-text { font-size: 0.72rem; color: rgba(255,255,255,0.65); line-height: 1.65; }
+    .sms-ex-text mark {
+      background: rgba(220,38,38,0.25); color: #FCA5A5;
+      border-radius: 3px; padding: 0 3px;
+    }
+    .sms-ex-chips { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 10px; }
+    .chip {
+      font-size: 0.6rem; font-weight: 700; padding: 3px 9px; border-radius: 5px;
+    }
+    .chip-red { background: rgba(220,38,38,0.15); color: #FCA5A5; }
+    .chip-amber { background: rgba(217,119,6,0.15); color: #FCD34D; }
+
+    /* Notification example */
+    .notif-example {
+      margin-top: 14px; max-width: 340px;
+      background: var(--white); border-radius: 14px; padding: 14px 16px;
+      border: 1.5px solid var(--red); box-shadow: 0 8px 24px rgba(220,38,38,0.1);
+    }
+    .ne-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .ne-icon { width: 26px; height: 26px; border-radius: 7px; background: var(--red); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+    .ne-app { font-size: 0.65rem; font-weight: 700; color: var(--ink); }
+    .ne-time { font-size: 0.6rem; color: var(--ink-mute); margin-left: auto; }
+    .ne-title { font-size: 0.82rem; font-weight: 700; color: var(--red); margin-bottom: 4px; }
+    .ne-body { font-size: 0.72rem; color: var(--ink-soft); line-height: 1.55; }
+
+    /* ─── SUPPORT ─── */
+    #support { }
+    .support-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+    .s-card {
+      border: 1.5px solid var(--border); border-radius: 16px; padding: 32px;
+      transition: border-color .2s;
+    }
+    .s-card:hover { border-color: #BFDBFE; }
+    .s-icon {
+      width: 46px; height: 46px; border-radius: 12px;
+      background: var(--blue-lt); display: flex; align-items: center;
+      justify-content: center; font-size: 20px; margin-bottom: 18px;
+    }
+    .s-card h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.2rem; color: var(--ink); margin-bottom: 9px;
+    }
+    .s-card p { font-size: 0.88rem; color: var(--ink-soft); line-height: 1.75; margin-bottom: 16px; }
+    .s-link {
+      color: var(--blue); font-weight: 600; text-decoration: none;
+      font-size: 0.88rem; display: inline-flex; align-items: center; gap: 5px;
+      transition: gap .2s;
+    }
+    .s-link:hover { gap: 9px; }
+
+    .contact-banner {
+      grid-column: 1 / -1;
+      background: var(--ink); border-radius: 16px;
+      padding: 40px 40px; display: flex; flex-wrap: wrap;
+      gap: 36px; align-items: center; justify-content: space-between;
+    }
+    .cb-left h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.5rem; color: var(--white); margin-bottom: 6px;
+    }
+    .cb-left p { font-size: 0.88rem; color: rgba(255,255,255,0.45); }
+    .cb-contacts { display: flex; flex-wrap: wrap; gap: 24px; }
+    .cb-item { display: flex; align-items: center; gap: 12px; }
+    .cb-item-icon {
+      width: 38px; height: 38px; border-radius: 9px;
+      background: rgba(255,255,255,0.07);
+      display: flex; align-items: center; justify-content: center; font-size: 16px;
+    }
+    .cb-item-label { font-size: 0.68rem; color: rgba(255,255,255,0.35); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 2px; }
+    .cb-item-val a, .cb-item-val span {
+      font-size: 0.88rem; color: var(--white); font-weight: 600; text-decoration: none;
+    }
+    .cb-item-val a:hover { color: #93C5FD; }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--ink);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      padding: 52px 5% 28px;
+    }
+    .footer-row {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between;
+    }
+    .footer-brand { max-width: 260px; }
+    .footer-logo {
+      display: flex; align-items: center; gap: 9px;
+      text-decoration: none; margin-bottom: 14px;
+    }
+    .fl-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: rgba(255,255,255,0.1);
+      display: flex; align-items: center; justify-content: center; font-size: 15px;
+    }
+    .fl-name {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.15rem; color: var(--white);
+    }
+    .fl-name span { color: #93C5FD; }
+    .footer-brand p { font-size: 0.8rem; color: rgba(255,255,255,0.35); line-height: 1.7; }
+
+    .footer-col h5 {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: rgba(255,255,255,0.3); margin-bottom: 14px;
+    }
+    .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .footer-col a {
+      text-decoration: none; color: rgba(255,255,255,0.55);
+      font-size: 0.85rem; transition: color .2s;
+    }
+    .footer-col a:hover { color: var(--white); }
+
+    .footer-bottom {
+      max-width: 1100px; margin: 36px auto 0;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding-top: 22px;
+      display: flex; flex-wrap: wrap; gap: 10px;
+      justify-content: space-between; align-items: center;
+    }
+    .footer-bottom p { font-size: 0.76rem; color: rgba(255,255,255,0.25); }
+
+    /* ─── PRICING ─── */
+    #pricing { }
+    .pricing-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+      max-width: 720px; margin: 0 auto;
+    }
+    .pricing-card {
+      border: 1.5px solid var(--border); border-radius: 20px;
+      padding: 36px 32px; background: var(--white);
+      display: flex; flex-direction: column; gap: 0;
+      transition: border-color .2s, box-shadow .2s;
+      position: relative;
+    }
+    .pricing-card:hover { border-color: #BFDBFE; box-shadow: 0 8px 32px rgba(27,79,216,0.07); }
+    .pricing-card.featured {
+      border-color: var(--blue);
+      background: var(--blue);
+      box-shadow: 0 12px 40px rgba(27,79,216,0.22);
+    }
+    .pricing-badge {
+      position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+      background: var(--ink); color: var(--white);
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 4px 14px; border-radius: 50px;
+    }
+    .pricing-plan {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--ink-mute); margin-bottom: 10px;
+    }
+    .pricing-card.featured .pricing-plan { color: rgba(255,255,255,0.6); }
+    .pricing-price {
+      font-family: 'Sora', sans-serif;
+      font-size: 2.6rem; font-weight: 800; color: var(--ink);
+      line-height: 1; margin-bottom: 4px; letter-spacing: -0.03em;
+    }
+    .pricing-card.featured .pricing-price { color: var(--white); }
+    .pricing-period {
+      font-size: 0.82rem; color: var(--ink-mute); margin-bottom: 24px;
+    }
+    .pricing-card.featured .pricing-period { color: rgba(255,255,255,0.55); }
+    .pricing-divider {
+      height: 1px; background: var(--border); margin-bottom: 22px;
+    }
+    .pricing-card.featured .pricing-divider { background: rgba(255,255,255,0.18); }
+    .pricing-features { list-style: none; display: flex; flex-direction: column; gap: 11px; margin-bottom: 28px; flex: 1; }
+    .pricing-features li {
+      display: flex; align-items: flex-start; gap: 9px;
+      font-size: 0.87rem; color: var(--ink-soft); line-height: 1.5;
+    }
+    .pricing-card.featured .pricing-features li { color: rgba(255,255,255,0.8); }
+    .pricing-features li::before {
+      content: '✓'; flex-shrink: 0; font-weight: 700;
+      color: var(--green); font-size: 0.8rem; margin-top: 1px;
+    }
+    .pricing-card.featured .pricing-features li::before { color: #86EFAC; }
+    .pricing-btn {
+      display: block; text-align: center; border-radius: 9px;
+      padding: 12px 20px; font-size: 0.92rem; font-weight: 600;
+      text-decoration: none; transition: background .2s, color .2s, transform .15s;
+    }
+    .pricing-btn:hover { transform: translateY(-1px); }
+    .pricing-btn-outline {
+      border: 1.5px solid var(--border); color: var(--ink); background: transparent;
+    }
+    .pricing-btn-outline:hover { border-color: var(--ink); }
+    .pricing-btn-white {
+      background: var(--white); color: var(--blue);
+    }
+    .pricing-btn-white:hover { background: #EEF3FF; }
+
+    /* ─── LEGAL MODALS ─── */
+    .legal-modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(13,17,23,0.6); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 24px;
+    }
+    .legal-modal-overlay.open { display: flex; }
+    .legal-modal {
+      background: var(--white); border-radius: 20px;
+      width: 100%; max-width: 720px; max-height: 88vh;
+      display: flex; flex-direction: column;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.22);
+      overflow: hidden;
+    }
+    .lm-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 24px 32px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .lm-header h2 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1.3rem; color: var(--ink); letter-spacing: -0.01em;
+    }
+    .lm-close {
+      width: 34px; height: 34px; border-radius: 8px; border: 1.5px solid var(--border);
+      background: transparent; cursor: pointer; font-size: 1.1rem; color: var(--ink-mute);
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .2s, color .2s;
+    }
+    .lm-close:hover { border-color: var(--ink); color: var(--ink); }
+    .lm-body {
+      overflow-y: auto; padding: 32px; flex: 1;
+    }
+    .lm-body .lm-updated {
+      font-size: 0.78rem; color: var(--ink-mute); margin-bottom: 28px;
+    }
+    .lm-body h3 {
+      font-family: 'Sora', sans-serif;
+      font-size: 1rem; color: var(--ink); margin: 24px 0 8px;
+    }
+    .lm-body h3:first-of-type { margin-top: 0; }
+    .lm-body p {
+      font-size: 0.88rem; color: var(--ink-soft); line-height: 1.85; margin-bottom: 10px;
+    }
+    .lm-body ul {
+      margin: 8px 0 10px 18px; display: flex; flex-direction: column; gap: 6px;
+    }
+    .lm-body ul li { font-size: 0.88rem; color: var(--ink-soft); line-height: 1.75; }
+    .lm-footer-note {
+      margin-top: 28px; padding: 16px 20px;
+      background: var(--surface); border-radius: 10px; border: 1px solid var(--border);
+      font-size: 0.82rem; color: var(--ink-mute); line-height: 1.7;
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      .hero-wrap { grid-template-columns: 1fr; }
+      .phone-wrap { display: none; }
+      .about-grid { grid-template-columns: 1fr; }
+      .about-visual { display: none; }
+      .support-grid { grid-template-columns: 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 420px; }
+    }
+    @media (max-width: 640px) {
+      nav { padding: 0 5%; }
+      .nav-links {
+        display: none; flex-direction: column;
+        position: fixed; top: 64px; left: 0; right: 0;
+        background: var(--white); padding: 24px 5%;
+        border-bottom: 1px solid var(--border); gap: 18px;
+      }
+      .nav-links.open { display: flex; }
+      .nav-burger { display: flex; }
+      .sec { padding: 72px 5%; }
+      .hero-h1 { font-size: 2.2rem; }
+      .contact-banner { padding: 28px 24px; }
+      .about-stats { grid-template-columns: 1fr 1fr; }
+      .step { grid-template-columns: 44px 1fr; gap: 18px; }
+      .step-num { width: 44px; height: 44px; font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a href="https://safeupi.org" class="nav-brand">
+    <div class="brand-icon">🛡</div>
+    <span class="brand-name">Safe<span>UPI</span></span>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#about">About Us</a></li>
+    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#support">Support</a></li>
+    <li><a href="#support" class="nav-cta" onclick="document.getElementById('support').scrollIntoView({behavior:'smooth'});return false;">Get Protected</a></li>
+  </ul>
+  <div class="nav-burger" id="navBurger" role="button" tabindex="0" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section id="hero">
+  <div class="hero-wrap">
+    <div class="hero-left">
+      <div class="hero-eyebrow">SMS Fraud Detection</div>
+      <h1 class="hero-h1">Your SMS alerts,<br><em>scanned for scams</em><br>before you act.</h1>
+      <p class="hero-p">SafeUPI monitors the payment SMS messages on your device, detects fraud patterns in real time, and sends you an instant warning — so you can spot a scam before it's too late.</p>
+      <div class="hero-btns">
+        <a href="#how-it-works" class="btn-dark" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'});return false;">See How It Works</a>
+        <a href="#about" class="btn-ghost" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'});return false;">About SafeUPI</a>
+      </div>
+    </div>
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="ps-bar"><span>9:41</span><span>100%</span></div>
+          <div class="ps-title">Messages</div>
+
+          <!-- Normal SMS -->
+          <div class="sms-bubble">
+            <div class="sms-from">AD-HDFCBK</div>
+            <div class="sms-text">Your a/c XX4821 credited with <strong>₹12,000</strong> on 14-Jun. Avl bal: ₹45,320.</div>
+            <div class="sms-time">9:02 AM</div>
+          </div>
+
+          <div class="ps-divider"><span>SafeUPI scanned 2 messages</span></div>
+
+          <!-- Suspicious SMS -->
+          <div class="sms-bubble" style="border: 1px solid rgba(220,38,38,0.3);">
+            <div class="sms-from" style="color: #FCA5A5;">UNKNOWN</div>
+            <div class="sms-text">Urgent! Your UPI linked account will be blocked. Click <strong>http://upivrf.xyz/verify</strong> to update KYC immediately.</div>
+            <div class="sms-time">9:18 AM</div>
+          </div>
+
+          <!-- Alert -->
+          <div class="phone-alert">
+            <div class="pa-header">
+              <div class="pa-dot"></div>
+              <div class="pa-label">SafeUPI Warning</div>
+              <div class="pa-badge">HIGH RISK</div>
+            </div>
+            <div class="pa-body">This SMS matches known phishing patterns. Do not click any links or share OTPs.</div>
+            <div class="pa-flags">
+              <div class="pa-flag">Suspicious link detected (upivrf.xyz)</div>
+              <div class="pa-flag">Fake urgency language</div>
+              <div class="pa-flag">Unknown sender ID</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-pill hp1">
+        <div class="hp-dot green"></div>
+        <div><strong>2 messages</strong> <span>scanned just now</span></div>
+      </div>
+      <div class="hero-pill hp2">
+        <div class="hp-dot amber"></div>
+        <div><strong>1 threat</strong> <span>flagged & alerted</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ABOUT ── -->
+<section id="about" class="sec sec-alt">
+  <div class="sec-inner">
+    <div class="about-grid">
+      <div class="about-text">
+        <div class="eyebrow">About Us</div>
+        <h2 class="sec-h2">Fraud awareness starts with your messages</h2>
+        <p>Digital payment scams in India often begin with a simple SMS — a fake bank alert, a phishing link disguised as a KYC reminder, or a message impersonating a known sender. By the time most people realise something is wrong, the damage is done.</p>
+        <p>SafeUPI was built to change that. Our platform monitors transaction-related SMS alerts received on your device and analyses them for known fraud indicators — suspicious links, spoofed sender IDs, fake urgency, and more. When a threat is detected, you get an immediate warning.</p>
+        <p>We don't interfere with your payments or access your bank. We simply watch your messages, and tell you when something looks wrong.</p>
+        <div class="about-stats">
+          <div class="about-stat">
+            <div class="val">Real‑time</div>
+            <div class="lbl">SMS analysis, on device</div>
+          </div>
+          <div class="about-stat">
+            <div class="val">Instant</div>
+            <div class="lbl">Alerts before you act</div>
+          </div>
+          <div class="about-stat">
+            <div class="val">0 bank</div>
+            <div class="lbl">credentials needed</div>
+          </div>
+          <div class="about-stat">
+            <div class="val">Always</div>
+            <div class="lbl">up-to-date threat patterns</div>
+          </div>
+        </div>
+      </div>
+      <div class="about-visual">
+        <div class="av-label">SMS inbox — live scan</div>
+        <div class="sms-stream">
+          <div class="sms-row">
+            <div class="sms-row-icon">💬</div>
+            <div class="sms-row-body">
+              <div class="sms-row-from">AD-ICICIB</div>
+              <div class="sms-row-text">OTP for UPI transaction ₹500 to Zomato is 847291. Valid 10 mins.</div>
+            </div>
+            <div class="sms-row-tag tag-safe">Safe</div>
+          </div>
+          <div class="sms-row">
+            <div class="sms-row-icon">💬</div>
+            <div class="sms-row-body">
+              <div class="sms-row-from">AD-SBIBNK</div>
+              <div class="sms-row-text">Your SBI a/c debited ₹1,200. If not done by you, call 1800111222.</div>
+            </div>
+            <div class="sms-row-tag tag-safe">Safe</div>
+          </div>
+          <div class="sms-row" style="border: 1px solid rgba(217,119,6,0.25);">
+            <div class="sms-row-icon">⚠️</div>
+            <div class="sms-row-body">
+              <div class="sms-row-from">UNKNOWN-7891</div>
+              <div class="sms-row-text">Win ₹50,000! Send ₹10 to activate your prize via UPI: prize@okaxis</div>
+            </div>
+            <div class="sms-row-tag tag-warn">Suspicious</div>
+          </div>
+          <div class="sms-row" style="border: 1px solid rgba(220,38,38,0.25);">
+            <div class="sms-row-icon">🚨</div>
+            <div class="sms-row-body">
+              <div class="sms-row-from">UNKNOWN</div>
+              <div class="sms-row-text">Your UPI will be blocked. Visit http://upi-kyc.xyz NOW to avoid suspension.</div>
+            </div>
+            <div class="sms-row-tag tag-risk">High Risk</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section id="how-it-works" class="sec">
+  <div class="sec-inner">
+    <div class="sec-head">
+      <div class="eyebrow">How It Works</div>
+      <h2 class="sec-h2">From SMS to safety in seconds</h2>
+      <p class="sec-sub">SafeUPI works quietly in the background — watching your inbox so you don't have to.</p>
+    </div>
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num-wrap">
+          <div class="step-num sn-1">1</div>
+        </div>
+        <div class="step-content">
+          <h3>A payment SMS arrives on your phone</h3>
+          <p>Every UPI transaction, bank debit, or payment-related alert generates an SMS on your device. SafeUPI monitors these messages as they arrive — nothing is uploaded or shared externally.</p>
+          <div class="sms-example">
+            <div class="sms-ex-from">AD-HDFCBK</div>
+            <div class="sms-ex-text">Your a/c XX4821 debited ₹4,500 on 14-Jun for UPI ref 3291847563. Avl bal ₹18,200.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num-wrap">
+          <div class="step-num sn-2">2</div>
+        </div>
+        <div class="step-content">
+          <h3>SafeUPI analyses it for fraud indicators</h3>
+          <p>Our system scans the message text against a continuously updated library of scam patterns — suspicious links, spoofed sender IDs, fake urgency phrases, impersonation keywords, and unusual UPI address formats.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num-wrap">
+          <div class="step-num sn-3">3</div>
+        </div>
+        <div class="step-content">
+          <h3>Suspicious patterns are flagged</h3>
+          <p>If the message contains indicators of fraud, each one is identified and tagged — so you know exactly what looks wrong and why.</p>
+          <div class="sms-example">
+            <div class="sms-ex-from">UNKNOWN</div>
+            <div class="sms-ex-text">URGENT: Your UPI ID will be <mark>suspended in 2 hours</mark>. Click <mark>http://upi-secure.xyz</mark> to verify KYC or lose access.</div>
+            <div class="sms-ex-chips">
+              <span class="chip chip-red">Phishing link</span>
+              <span class="chip chip-amber">Fake urgency</span>
+              <span class="chip chip-red">Unregistered sender</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num-wrap">
+          <div class="step-num sn-4">4</div>
+        </div>
+        <div class="step-content">
+          <h3>You receive an instant warning notification</h3>
+          <p>SafeUPI pushes an alert to your device immediately — before you have a chance to click a link, share an OTP, or make a payment. The notification explains what was found and what to avoid.</p>
+          <div class="notif-example">
+            <div class="ne-top">
+              <div class="ne-icon">🛡</div>
+              <div class="ne-app">SafeUPI</div>
+              <div class="ne-time">just now</div>
+            </div>
+            <div class="ne-title">⚠️ Fraud Warning Detected</div>
+            <div class="ne-body">A suspicious SMS was detected. It contains a phishing link and fake urgency. Do not click any links or share your OTP.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num-wrap">
+          <div class="step-num sn-5">5</div>
+        </div>
+        <div class="step-content">
+          <h3>You stay informed and in control</h3>
+          <p>With the warning in hand, you can ignore the suspicious message, report it, or contact your bank — with enough information to take the right action. SafeUPI gives you awareness; you make the decision.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ── -->
+<section id="pricing" class="sec sec-alt">
+  <div class="sec-inner">
+    <div class="sec-head centered">
+      <div class="eyebrow">Pricing</div>
+      <h2 class="sec-h2">Simple, honest pricing</h2>
+      <p class="sec-sub">Start free. No credit card required. Upgrade whenever you're ready.</p>
+    </div>
+    <div class="pricing-grid">
+
+      <!-- Free Trial -->
+      <div class="pricing-card">
+        <div class="pricing-plan">Free Trial</div>
+        <div class="pricing-price">₹0</div>
+        <div class="pricing-period">for your first 7 days</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>Real-time SMS fraud detection</li>
+          <li>Instant push notifications</li>
+          <li>Full access to all features</li>
+          <li>No credit card needed to start</li>
+        </ul>
+        <a href="mailto:support@safeupi.org?subject=Free%20Trial%20Request" class="pricing-btn pricing-btn-outline">Start Free Trial</a>
+      </div>
+
+      <!-- Monthly -->
+      <div class="pricing-card featured">
+        <div class="pricing-badge">Most Popular</div>
+        <div class="pricing-plan">Monthly</div>
+        <div class="pricing-price">₹99</div>
+        <div class="pricing-period">per month, billed monthly</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li>Everything in Free Trial</li>
+          <li>Continuous background scanning</li>
+          <li>Updated fraud pattern library</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="mailto:support@safeupi.org?subject=Subscription%20Enquiry" class="pricing-btn pricing-btn-white">Get Protected →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── SUPPORT ── -->
+<section id="support" class="sec sec-alt">
+  <div class="sec-inner">
+    <div class="sec-head">
+      <div class="eyebrow">Support</div>
+      <h2 class="sec-h2">We're here if you need us</h2>
+      <p class="sec-sub">Questions about how SafeUPI works, or spotted something unusual? Reach out — we respond promptly.</p>
+    </div>
+    <div class="support-grid">
+      <div class="s-card">
+        <div class="s-icon">📖</div>
+        <h3>Documentation</h3>
+        <p>Read guides on how SafeUPI detects scams, what patterns it looks for, and how to understand the alerts you receive.</p>
+        <a href="https://safeupi.org" target="_blank" rel="noopener" class="s-link">Visit safeupi.org →</a>
+      </div>
+      <div class="s-card">
+        <div class="s-icon">🚩</div>
+        <h3>Report a Missed Scam</h3>
+        <p>Received a suspicious SMS that SafeUPI didn't catch? Let us know so we can improve our detection and protect others.</p>
+        <a href="mailto:support@safeupi.org?subject=Missed%20Scam%20Report&body=Hi%20SafeUPI%20team%2C%0A%0AI%20received%20a%20suspicious%20SMS%20that%20was%20not%20flagged.%20Here%20are%20the%20details%3A%0A%0A" class="s-link">Send a report →</a>
+      </div>
+      <div class="contact-banner">
+        <div class="cb-left">
+          <h3>Get in touch</h3>
+          <p>For support, feedback, or partnership enquiries.</p>
+        </div>
+        <div class="cb-contacts">
+          <div class="cb-item">
+            <div class="cb-item-icon">✉️</div>
+            <div class="cb-item-val">
+              <div class="cb-item-label">Email Support</div>
+              <a href="mailto:support@safeupi.org">support@safeupi.org</a>
+            </div>
+          </div>
+          <div class="cb-item">
+            <div class="cb-item-icon">🤝</div>
+            <div class="cb-item-val">
+              <div class="cb-item-label">Partnerships</div>
+              <a href="mailto:partners@safeupi.org">partners@safeupi.org</a>
+            </div>
+          </div>
+          <div class="cb-item">
+            <div class="cb-item-icon">🌐</div>
+            <div class="cb-item-val">
+              <div class="cb-item-label">Website</div>
+              <a href="https://safeupi.org" target="_blank" rel="noopener">safeupi.org</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-row">
+    <div class="footer-brand">
+      <a href="https://safeupi.org" class="footer-logo">
+        <div class="fl-icon">🛡</div>
+        <span class="fl-name">Safe<span>UPI</span></span>
+      </a>
+      <p>SMS fraud detection and user awareness for safer digital payments in India.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Navigate</h5>
+      <ul>
+        <li><a href="#about" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'});return false;">About Us</a></li>
+        <li><a href="#how-it-works" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'});return false;">How It Works</a></li>
+        <li><a href="#pricing" onclick="document.getElementById('pricing').scrollIntoView({behavior:'smooth'});return false;">Pricing</a></li>
+        <li><a href="#support" onclick="document.getElementById('support').scrollIntoView({behavior:'smooth'});return false;">Support</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Contact</h5>
+      <ul>
+        <li><a href="mailto:support@safeupi.org">support@safeupi.org</a></li>
+        <li><a href="mailto:partners@safeupi.org">partners@safeupi.org</a></li>
+        <li><a href="https://safeupi.org" target="_blank" rel="noopener">safeupi.org</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Legal</h5>
+      <ul>
+        <li><a href="#" onclick="openLegal('privacy');return false;">Privacy Policy</a></li>
+        <li><a href="#" onclick="openLegal('terms');return false;">Terms of Service</a></li>
+        <li style="color: rgba(255,255,255,0.3); font-size: 0.78rem; line-height: 1.5; padding-top: 6px;">DE5 Solutions<br>Private Limited</li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 SafeUPI. All rights reserved.</p>
+    <p>Built to protect India's digital payments.</p>
+  </div>
+</footer>
+
+<script>
+  // ── Mobile nav toggle ──
+  const burger = document.getElementById('navBurger');
+  const navMenu = document.getElementById('navLinks');
+
+  burger.addEventListener('click', () => navMenu.classList.toggle('open'));
+  burger.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') navMenu.classList.toggle('open'); });
+
+  // Close nav when any link is clicked (mobile)
+  navMenu.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => navMenu.classList.remove('open'));
+  });
+
+  // ── Smooth scroll for all internal anchor links ──
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', function(e) {
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        const navH = document.querySelector('nav').offsetHeight;
+        const top = target.getBoundingClientRect().top + window.scrollY - navH;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    });
+  });
+
+  // ── Active nav highlight on scroll ──
+  const sections = document.querySelectorAll('section[id]');
+  const navAs = document.querySelectorAll('.nav-links a:not(.nav-cta)');
+
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const id = e.target.id;
+        navAs.forEach(a => {
+          const match = a.getAttribute('href') === `#${id}`;
+          a.style.color = match ? 'var(--ink)' : '';
+          a.style.fontWeight = match ? '600' : '';
+        });
+      }
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+
+  sections.forEach(s => io.observe(s));
+</script>
+<!-- ── PRIVACY POLICY MODAL ── -->
+<div class="legal-modal-overlay" id="modalPrivacy" role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
+  <div class="legal-modal">
+    <div class="lm-header">
+      <h2 id="privacyTitle">Privacy Policy</h2>
+      <button class="lm-close" onclick="closeLegal('privacy')" aria-label="Close">✕</button>
+    </div>
+    <div class="lm-body">
+      <p class="lm-updated">Last updated: June 2025 &nbsp;·&nbsp; DE5 Solutions Private Limited</p>
+
+      <h3>1. Who We Are</h3>
+      <p>SafeUPI is a product of DE5 Solutions Private Limited ("DE5", "we", "us", or "our"), a company incorporated in India. We operate an SMS fraud detection and alert service designed to help users identify potentially fraudulent payment-related messages on their devices.</p>
+
+      <h3>2. What Information We Collect</h3>
+      <p>To deliver our service, we process the following:</p>
+      <ul>
+        <li><strong>SMS message content</strong> — payment and UPI-related SMS messages are read on-device for fraud pattern analysis.</li>
+        <li><strong>Device identifiers</strong> — anonymous identifiers used to deliver push notifications and maintain service continuity.</li>
+        <li><strong>Usage data</strong> — aggregated, anonymised data on how features are used, to improve detection accuracy.</li>
+        <li><strong>Contact information</strong> — only if you contact us directly (e.g. your email address when reporting a missed scam).</li>
+      </ul>
+      <p>We do <strong>not</strong> collect bank credentials, UPI PINs, OTPs, passwords, or any financial account details.</p>
+
+      <h3>3. How We Use Your Information</h3>
+      <ul>
+        <li>To scan SMS messages for known fraud patterns and deliver real-time warnings.</li>
+        <li>To improve our fraud detection library based on anonymised, aggregated signals.</li>
+        <li>To send you service notifications and alerts.</li>
+        <li>To respond to your support requests or reports.</li>
+      </ul>
+
+      <h3>4. On-Device Processing</h3>
+      <p>SMS analysis is performed locally on your device. Message content is not transmitted to our servers unless you explicitly choose to report a suspicious message. Even then, only the message text is shared — no personal identifiers are attached.</p>
+
+      <h3>5. Data Sharing</h3>
+      <p>We do not sell, rent, or trade your personal data. We may share data only in the following limited circumstances:</p>
+      <ul>
+        <li>With trusted service providers who assist us in operating the app (e.g. push notification infrastructure), bound by confidentiality agreements.</li>
+        <li>If required by law, court order, or a regulatory authority in India.</li>
+        <li>To protect the rights, safety, or property of DE5 Solutions Private Limited or our users.</li>
+      </ul>
+
+      <h3>6. Data Retention</h3>
+      <p>We retain anonymised usage data for up to 24 months for service improvement purposes. If you contact us directly, we retain correspondence for up to 12 months. You may request deletion at any time by writing to us.</p>
+
+      <h3>7. Your Rights</h3>
+      <p>Under applicable Indian data protection law, you have the right to access, correct, or request deletion of personal data we hold about you. To exercise any of these rights, contact us at <a href="mailto:privacy@safeupi.org">privacy@safeupi.org</a>.</p>
+
+      <h3>8. Security</h3>
+      <p>We implement industry-standard security measures to protect any data we process. However, no system is completely secure. We encourage you to report any security concerns to <a href="mailto:support@safeupi.org">support@safeupi.org</a>.</p>
+
+      <h3>9. Children's Privacy</h3>
+      <p>SafeUPI is not directed at children under the age of 18. We do not knowingly collect personal data from minors.</p>
+
+      <h3>10. Changes to This Policy</h3>
+      <p>We may update this Privacy Policy from time to time. We will notify you of material changes via the app or by updating the "Last updated" date above. Continued use of SafeUPI after changes constitutes acceptance of the revised policy.</p>
+
+      <h3>11. Contact Us</h3>
+      <p>For any privacy-related questions or requests:</p>
+      <div class="lm-footer-note">
+        <strong>DE5 Solutions Private Limited</strong><br>
+        Email: <a href="mailto:privacy@safeupi.org">privacy@safeupi.org</a><br>
+        Website: <a href="https://safeupi.org" target="_blank" rel="noopener">safeupi.org</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── TERMS OF SERVICE MODAL ── -->
+<div class="legal-modal-overlay" id="modalTerms" role="dialog" aria-modal="true" aria-labelledby="termsTitle">
+  <div class="legal-modal">
+    <div class="lm-header">
+      <h2 id="termsTitle">Terms of Service</h2>
+      <button class="lm-close" onclick="closeLegal('terms')" aria-label="Close">✕</button>
+    </div>
+    <div class="lm-body">
+      <p class="lm-updated">Last updated: June 2025 &nbsp;·&nbsp; DE5 Solutions Private Limited</p>
+
+      <h3>1. Acceptance of Terms</h3>
+      <p>By downloading, installing, or using SafeUPI ("the Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree, please do not use the Service. These Terms constitute a legally binding agreement between you and DE5 Solutions Private Limited ("DE5", "we", "us").</p>
+
+      <h3>2. Description of Service</h3>
+      <p>SafeUPI is an SMS fraud detection and alert application. It monitors payment-related SMS messages on your device, analyses them for known fraud indicators, and notifies you when suspicious patterns are detected. SafeUPI is an awareness tool — it does not block transactions, access your bank accounts, or process payments on your behalf.</p>
+
+      <h3>3. Free Trial & Subscription</h3>
+      <ul>
+        <li><strong>Free Trial:</strong> New users receive a 7-day free trial with full access to all features. No payment information is required to start the trial.</li>
+        <li><strong>Monthly Plan:</strong> After the trial, continued use of SafeUPI is available at ₹99 per month, billed monthly. You may cancel at any time before the next billing cycle.</li>
+        <li>Pricing is subject to change with reasonable prior notice to active subscribers.</li>
+      </ul>
+
+      <h3>4. Eligibility</h3>
+      <p>You must be at least 18 years of age and a resident of India to use SafeUPI. By using the Service, you represent and warrant that you meet these requirements.</p>
+
+      <h3>5. Permitted Use</h3>
+      <p>You may use SafeUPI solely for personal, non-commercial purposes. You agree not to:</p>
+      <ul>
+        <li>Reverse-engineer, decompile, or attempt to extract the source code of the app.</li>
+        <li>Use the Service to harass, defraud, or harm any other person.</li>
+        <li>Attempt to circumvent or disable any security features of the Service.</li>
+        <li>Resell, sublicense, or redistribute the Service or any part of it.</li>
+      </ul>
+
+      <h3>6. Disclaimer of Warranties</h3>
+      <p>SafeUPI is provided "as is" and "as available" without warranties of any kind, express or implied. While we strive to maintain accurate and up-to-date fraud detection, we do not guarantee that every fraudulent message will be detected, or that every flagged message is fraudulent. The Service is an aid to your judgement, not a substitute for it.</p>
+
+      <h3>7. Limitation of Liability</h3>
+      <p>To the maximum extent permitted by applicable law, DE5 Solutions Private Limited shall not be liable for any indirect, incidental, special, consequential, or punitive damages, including but not limited to financial loss resulting from acting on, or failing to act on, a SafeUPI alert. Our total liability to you in any circumstances shall not exceed the amount you paid for the Service in the 30 days preceding the claim.</p>
+
+      <h3>8. Intellectual Property</h3>
+      <p>All content, branding, software, and technology within SafeUPI are the exclusive property of DE5 Solutions Private Limited or its licensors. Nothing in these Terms grants you any ownership rights over the Service.</p>
+
+      <h3>9. Termination</h3>
+      <p>We reserve the right to suspend or terminate your access to SafeUPI at any time, with or without notice, if we reasonably believe you have violated these Terms. You may also stop using the Service at any time by uninstalling the application.</p>
+
+      <h3>10. Governing Law</h3>
+      <p>These Terms are governed by and construed in accordance with the laws of India. Any disputes arising out of or relating to these Terms or the Service shall be subject to the exclusive jurisdiction of the courts of India.</p>
+
+      <h3>11. Changes to These Terms</h3>
+      <p>We may revise these Terms from time to time. We will notify you of significant changes via the app or email. Continued use of SafeUPI following notice of changes constitutes your acceptance of the updated Terms.</p>
+
+      <h3>12. Contact Us</h3>
+      <p>For any questions regarding these Terms:</p>
+      <div class="lm-footer-note">
+        <strong>DE5 Solutions Private Limited</strong><br>
+        Email: <a href="mailto:support@safeupi.org">support@safeupi.org</a><br>
+        Website: <a href="https://safeupi.org" target="_blank" rel="noopener">safeupi.org</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openLegal(type) {
+    const id = type === 'privacy' ? 'modalPrivacy' : 'modalTerms';
+    document.getElementById(id).classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLegal(type) {
+    const id = type === 'privacy' ? 'modalPrivacy' : 'modalTerms';
+    document.getElementById(id).classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  // Close on overlay click
+  document.querySelectorAll('.legal-modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === this) {
+        this.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+  // Close on Escape key
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.legal-modal-overlay.open').forEach(m => {
+        m.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    }
+  });
+</script>
+</body>
+</html>
